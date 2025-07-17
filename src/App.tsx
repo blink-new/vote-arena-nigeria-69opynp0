@@ -31,53 +31,148 @@ function App() {
     return unsubscribe
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      loadData()
-    }
-  }, [user, loadData])
-
   const loadData = useCallback(async () => {
     try {
-      // Load campaigns
-      const campaignsData = await blink.db.campaigns.list({
-        where: { isActive: "1" },
-        limit: 20
-      })
-      setCampaigns(campaignsData)
+      // For now, we'll use mock data since we need to create database tables first
+      const mockCampaigns = [
+        {
+          id: 'camp_1',
+          candidateName: 'Adebayo Ogundimu',
+          partyName: 'Progressive Alliance Party',
+          position: 'Governor - Lagos State',
+          supportersCount: 1250,
+          isActive: "1",
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'camp_2',
+          candidateName: 'Fatima Abdullahi',
+          partyName: 'People\'s Democratic Movement',
+          position: 'Senator - Kano North',
+          supportersCount: 890,
+          isActive: "1",
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'camp_3',
+          candidateName: 'Chukwuma Okafor',
+          partyName: 'New Nigeria Party',
+          position: 'House of Representatives - Anambra East',
+          supportersCount: 650,
+          isActive: "1",
+          createdAt: new Date().toISOString()
+        }
+      ]
 
-      // Load user posts
-      const postsData = await blink.db.campaignPosts.list({
-        where: { userId: user?.id },
-        orderBy: { createdAt: 'desc' },
-        limit: 50
-      })
-      setUserPosts(postsData)
+      setCampaigns(mockCampaigns)
 
-      // Load daily rewards
-      const rewardsData = await blink.db.dailyRewards.list({
-        where: { userId: user?.id },
-        orderBy: { date: 'desc' },
-        limit: 30
-      })
-      setDailyRewards(rewardsData)
+      // Mock user posts
+      const mockPosts = [
+        {
+          id: 'post_1',
+          userId: user?.id,
+          campaignId: 'camp_1',
+          type: 'text' as const,
+          content: 'Supporting Adebayo for a digital Lagos! #VoteArena #Lagos2025',
+          likes: 45,
+          shares: 12,
+          views: 230,
+          pointsEarned: 10,
+          createdAt: new Date(Date.now() - 86400000).toISOString() // Yesterday
+        },
+        {
+          id: 'post_2',
+          userId: user?.id,
+          campaignId: 'camp_2',
+          type: 'image' as const,
+          content: 'Fatima\'s vision for women empowerment resonates with me!',
+          likes: 78,
+          shares: 25,
+          views: 450,
+          pointsEarned: 25,
+          createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+        }
+      ]
 
-      // Load weekly leaderboard
-      const leaderboardData = await blink.db.weeklyLeaderboard.list({
-        orderBy: { totalPoints: 'desc' },
-        limit: 20
-      })
-      setWeeklyLeaderboard(leaderboardData)
+      setUserPosts(mockPosts)
+
+      // Mock daily rewards
+      const mockRewards = [
+        {
+          id: 'reward_1',
+          userId: user?.id,
+          rank: 3,
+          amount: 2500,
+          claimed: "0",
+          date: new Date().toISOString()
+        }
+      ]
+
+      setDailyRewards(mockRewards)
+
+      // Mock leaderboard
+      const mockLeaderboard = [
+        {
+          id: 'leader_1',
+          userId: 'user_123',
+          userName: 'Kemi Adebayo',
+          totalPoints: 2850,
+          totalPosts: 45,
+          totalEngagement: 1200
+        },
+        {
+          id: 'leader_2',
+          userId: 'user_456',
+          userName: 'Ibrahim Musa',
+          totalPoints: 2650,
+          totalPosts: 38,
+          totalEngagement: 980
+        },
+        {
+          id: 'leader_3',
+          userId: user?.id || 'current_user',
+          userName: user?.displayName || user?.email || 'You',
+          totalPoints: 2400,
+          totalPosts: 35,
+          totalEngagement: 850
+        },
+        {
+          id: 'leader_4',
+          userId: 'user_789',
+          userName: 'Chioma Okoro',
+          totalPoints: 2200,
+          totalPosts: 32,
+          totalEngagement: 720
+        },
+        {
+          id: 'leader_5',
+          userId: 'user_101',
+          userName: 'Yusuf Hassan',
+          totalPoints: 2000,
+          totalPosts: 28,
+          totalEngagement: 650
+        }
+      ]
+
+      setWeeklyLeaderboard(mockLeaderboard)
     } catch (error) {
       console.error('Error loading data:', error)
     }
-  }, [user?.id])
+  }, [user?.id, user?.displayName, user?.email])
+
+  useEffect(() => {
+    if (user?.id) {
+      loadData()
+    }
+  }, [user?.id, loadData])
 
   const createCampaignPost = async () => {
     if (!selectedCampaign || !postContent.trim()) return
 
     try {
-      const newPost = await blink.db.campaignPosts.create({
+      // Create mock post since we don't have database tables yet
+      const newPost = {
+        id: `post_${Date.now()}`,
         userId: user?.id,
         campaignId: selectedCampaign,
         type: postType,
@@ -87,7 +182,7 @@ function App() {
         views: 0,
         pointsEarned: calculatePostPoints(postType),
         createdAt: new Date().toISOString()
-      })
+      }
 
       setUserPosts(prev => [newPost, ...prev])
       setPostContent('')
@@ -111,7 +206,7 @@ function App() {
 
   const claimDailyReward = async (rewardId: string) => {
     try {
-      await blink.db.dailyRewards.update(rewardId, { claimed: "1" })
+      // Update mock data since we don't have database tables yet
       setDailyRewards(prev => 
         prev.map(reward => 
           reward.id === rewardId ? { ...reward, claimed: "1" } : reward
