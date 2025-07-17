@@ -2,9 +2,10 @@ export interface User {
   id: string
   email: string
   displayName?: string
-  subscriptionTier: 'free' | 'basic' | 'premium' | 'vip'
-  points: number
-  createdAt: string
+  avatar?: string
+  subscriptionTier?: 'free' | 'basic' | 'premium' | 'vip'
+  points?: number
+  createdAt?: string
 }
 
 export interface Reward {
@@ -46,10 +47,11 @@ export interface Campaign {
   candidateName: string
   partyName: string
   position: string
-  description: string
+  description?: string
   imageUrl?: string
   supportersCount: number
-  isActive: boolean
+  isActive: string // SQLite compatibility: "0" or "1"
+  createdAt: string
 }
 
 export interface CampaignPost {
@@ -72,7 +74,7 @@ export interface DailyReward {
   amount: number
   type: 'daily' | 'weekly' | 'campaign_spread'
   date: string
-  claimed: boolean
+  claimed: string // SQLite compatibility: "0" or "1"
   rank: number
 }
 

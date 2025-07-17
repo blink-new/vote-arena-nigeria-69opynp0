@@ -219,10 +219,14 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen naija-hero-bg flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-lg font-medium">Loading VoteArena...</p>
+          <div className="w-16 h-16 naija-gradient rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+            <Trophy className="w-8 h-8 text-white" />
+          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-xl font-bold text-white bebas-font">Loading VoteArena...</p>
+          <p className="text-yellow-300 roboto-font">Preparing your democracy game...</p>
         </div>
       </div>
     )
@@ -230,16 +234,46 @@ function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-primary">Welcome to VoteArena</CardTitle>
-            <CardDescription>Nigeria's Gamified Political Platform</CardDescription>
+      <div className="min-h-screen naija-hero-bg flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg bg-white/95 backdrop-blur-sm arena-glow">
+          <CardHeader className="text-center space-y-4">
+            <div className="w-16 h-16 naija-gradient rounded-full flex items-center justify-center mx-auto">
+              <Trophy className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-4xl font-bold naija-text-gradient bebas-font">
+              Welcome to VoteArena!
+            </CardTitle>
+            <CardDescription className="text-lg roboto-font">
+              Nigeria's First Gamified Political Platform
+            </CardDescription>
+            <div className="text-center space-y-2">
+              <p className="text-yellow-600 font-bold bebas-font text-xl">Play, Win, and Shape Naija's Future!</p>
+              <p className="text-gray-600 roboto-font">
+                Oga, join the ultimate democracy game! Earn cash, scholarships, and jobs by supporting your favorite candidates.
+              </p>
+            </div>
           </CardHeader>
-          <CardContent className="text-center">
-            <Button onClick={() => blink.auth.login()} className="w-full">
-              Sign In to Start Earning
+          <CardContent className="text-center space-y-6">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-green-50 p-3 rounded-lg">
+                <div className="font-bold text-green-600 bebas-font">₦20,000</div>
+                <div className="text-gray-600">Daily Rewards</div>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <div className="font-bold text-yellow-600 bebas-font">₦100,000</div>
+                <div className="text-gray-600">Weekly Jackpot</div>
+              </div>
+            </div>
+            <Button 
+              onClick={() => blink.auth.login()} 
+              className="w-full btn-naija text-lg py-4 bebas-font"
+              size="lg"
+            >
+              🚀 Sign In & Start Earning Now!
             </Button>
+            <p className="text-xs text-gray-500 roboto-font">
+              Vote. Earn. Win. - Join thousands of Nigerians already earning!
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -253,25 +287,26 @@ function App() {
   const userRank = weeklyLeaderboard.findIndex(u => u.userId === user.id) + 1
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50">
+    <div className="min-h-screen naija-hero-bg">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 naija-gradient rounded-full flex items-center justify-center">
                 <Trophy className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-primary">VoteArena</h1>
+              <h1 className="text-2xl font-bold naija-text-gradient bebas-font">VoteArena</h1>
+              <span className="text-sm text-gray-600 roboto-font hidden sm:block">Win Big in Naija's Democracy Game!</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="secondary" className="bg-accent text-black">
+              <Badge className="points-badge">
                 <Coins className="w-4 h-4 mr-1" />
                 {user.points || 0} Points
               </Badge>
               <Avatar>
                 <AvatarImage src={user.avatar} />
-                <AvatarFallback>{user.displayName?.[0] || user.email[0]}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-white">{user.displayName?.[0] || user.email[0]}</AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -279,44 +314,73 @@ function App() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Welcome Section */}
+        <div className="text-center mb-8 arena-glow">
+          <h1 className="text-4xl md:text-6xl font-bold text-white bebas-font mb-4">
+            Welcome to VoteArena!
+          </h1>
+          <h2 className="text-xl md:text-2xl text-yellow-300 roboto-font mb-6">
+            Play, Win, and Shape Naija's Future!
+          </h2>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 roboto-font">
+            Oga, join the ultimate democracy game in Lagos, Kano, and Rivers! Vote, earn cash, VST tokens, or jobs, and make your voice count.
+          </p>
+          <div className="text-center">
+            <span className="text-yellow-300 font-bold bebas-font text-lg">Vote. Earn. Win.</span>
+          </div>
+        </div>
+
         {/* Rewards Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="reward-card text-white bg-gradient-to-r from-green-500 to-green-600 card-hover">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center">
+              <CardTitle className="text-lg flex items-center bebas-font">
                 <Gift className="w-5 h-5 mr-2" />
-                Daily Rewards
+                Win Bag of Rice
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₦20,000</div>
-              <p className="text-green-100">Shared among top 10 daily</p>
+              <div className="text-2xl font-bold">₦80,000</div>
+              <p className="text-green-100 text-sm">Share posts on X to win 50kg rice</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+          <Card className="reward-card text-white bg-gradient-to-r from-yellow-500 to-yellow-600 card-hover">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center">
+              <CardTitle className="text-lg flex items-center bebas-font">
                 <Award className="w-5 h-5 mr-2" />
-                Weekly Jackpot
+                Win Scholarship
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">₦500,000</div>
+              <p className="text-yellow-100 text-sm">Top voters win school fees</p>
+            </CardContent>
+          </Card>
+
+          <Card className="reward-card text-white bg-gradient-to-r from-blue-500 to-blue-600 card-hover">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center bebas-font">
+                <DollarSign className="w-5 h-5 mr-2" />
+                Monthly Salary
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₦100,000</div>
-              <p className="text-yellow-100">Top 5 weekly winners</p>
+              <p className="text-blue-100 text-sm">Monthly salary for a year</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <Card className="reward-card text-white bg-gradient-to-r from-purple-500 to-purple-600 card-hover">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center">
+              <CardTitle className="text-lg flex items-center bebas-font">
                 <TrendingUp className="w-5 h-5 mr-2" />
                 Your Rank
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">#{userRank || 'Unranked'}</div>
-              <p className="text-blue-100">This week's position</p>
+              <p className="text-purple-100 text-sm">This week's position</p>
             </CardContent>
           </Card>
         </div>
@@ -332,25 +396,42 @@ function App() {
 
           {/* Campaign Tab */}
           <TabsContent value="campaign" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Camera className="w-5 h-5 mr-2" />
-                  Spread Campaign & Earn
+            {/* Post and Earn Section - Featured */}
+            <Card className="post-earn-card">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl bebas-font naija-text-gradient flex items-center justify-center">
+                  <Camera className="w-6 h-6 mr-2" />
+                  Post & Earn 10 Points!
                 </CardTitle>
-                <CardDescription>
-                  Post campaign content to earn points and compete for daily/weekly rewards
+                <CardDescription className="text-lg roboto-font">
+                  Oga, spread campaign content and win big rewards! Share posts on X, earn points, and compete for daily ₦20,000 and weekly ₦100,000 prizes!
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="bg-white/50 rounded-lg p-3">
+                    <div className="text-2xl font-bold text-green-600 bebas-font">10+</div>
+                    <div className="text-sm text-gray-600">Points per post</div>
+                  </div>
+                  <div className="bg-white/50 rounded-lg p-3">
+                    <div className="text-2xl font-bold text-yellow-600 bebas-font">₦20K</div>
+                    <div className="text-sm text-gray-600">Daily rewards</div>
+                  </div>
+                  <div className="bg-white/50 rounded-lg p-3">
+                    <div className="text-2xl font-bold text-blue-600 bebas-font">₦100K</div>
+                    <div className="text-sm text-gray-600">Weekly jackpot</div>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-2">Select Campaign</label>
+                  <label className="block text-sm font-medium mb-2 roboto-font">Select Campaign to Support</label>
                   <select 
                     value={selectedCampaign}
                     onChange={(e) => setSelectedCampaign(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-3 border-2 border-yellow-200 rounded-lg focus:border-yellow-400 roboto-font"
                   >
-                    <option value="">Choose a campaign to support</option>
+                    <option value="">Choose a candidate to support</option>
                     {campaigns.map(campaign => (
                       <option key={campaign.id} value={campaign.id}>
                         {campaign.candidateName} - {campaign.partyName}
@@ -360,82 +441,118 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Post Type</label>
-                  <div className="flex space-x-2">
+                  <label className="block text-sm font-medium mb-3 roboto-font">Choose Your Post Type & Earn Points</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <Button 
                       variant={postType === 'text' ? 'default' : 'outline'}
-                      size="sm"
+                      className={`h-auto p-4 flex flex-col items-center space-y-2 ${postType === 'text' ? 'btn-naija' : 'border-2 border-yellow-200 hover:border-yellow-400'}`}
                       onClick={() => setPostType('text')}
                     >
-                      Text (10 pts)
+                      <div className="text-2xl bebas-font">10 PTS</div>
+                      <div className="text-sm">Text Post</div>
+                      <div className="text-xs opacity-75">Quick & Easy</div>
                     </Button>
                     <Button 
                       variant={postType === 'image' ? 'default' : 'outline'}
-                      size="sm"
+                      className={`h-auto p-4 flex flex-col items-center space-y-2 ${postType === 'image' ? 'btn-naija' : 'border-2 border-yellow-200 hover:border-yellow-400'}`}
                       onClick={() => setPostType('image')}
                     >
-                      <Camera className="w-4 h-4 mr-1" />
-                      Image (25 pts)
+                      <Camera className="w-6 h-6" />
+                      <div className="text-2xl bebas-font">25 PTS</div>
+                      <div className="text-sm">Image Post</div>
+                      <div className="text-xs opacity-75">More Engaging</div>
                     </Button>
                     <Button 
                       variant={postType === 'video' ? 'default' : 'outline'}
-                      size="sm"
+                      className={`h-auto p-4 flex flex-col items-center space-y-2 ${postType === 'video' ? 'btn-naija' : 'border-2 border-yellow-200 hover:border-yellow-400'}`}
                       onClick={() => setPostType('video')}
                     >
-                      <Video className="w-4 h-4 mr-1" />
-                      Video (50 pts)
+                      <Video className="w-6 h-6" />
+                      <div className="text-2xl bebas-font">50 PTS</div>
+                      <div className="text-sm">Video Post</div>
+                      <div className="text-xs opacity-75">Maximum Impact</div>
                     </Button>
                   </div>
                 </div>
 
                 <Textarea
-                  placeholder="Write your campaign post content..."
+                  placeholder="Write your campaign post content... e.g., 'Supporting Adebayo for a digital Lagos! #VoteArena #Lagos2025'"
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                   rows={4}
+                  className="border-2 border-yellow-200 focus:border-yellow-400 roboto-font"
                 />
 
                 {postType !== 'text' && (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600">Upload your {postType} file</p>
+                  <div className="border-2 border-dashed border-yellow-300 rounded-lg p-6 text-center bg-yellow-50">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-yellow-600" />
+                    <p className="text-sm text-gray-700 roboto-font">Upload your {postType} file to earn {calculatePostPoints(postType)} points</p>
+                    <p className="text-xs text-gray-600 mt-1">Max file size: 10MB</p>
                   </div>
                 )}
 
                 <Button 
                   onClick={createCampaignPost}
                   disabled={!selectedCampaign || !postContent.trim()}
-                  className="w-full"
+                  className="w-full btn-naija text-lg py-4 bebas-font"
+                  size="lg"
                 >
-                  Post & Earn {calculatePostPoints(postType)} Points
+                  🚀 Post & Earn {calculatePostPoints(postType)} Points Now!
                 </Button>
+
+                {/* How it Works */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-bold text-blue-800 mb-2 bebas-font">How to Win Big:</h4>
+                  <ul className="text-sm text-blue-700 space-y-1 roboto-font">
+                    <li>• Post campaign content to earn 10-50 points</li>
+                    <li>• Share on X (Twitter) for bonus engagement</li>
+                    <li>• Top 10 daily posters share ₦20,000</li>
+                    <li>• Top 5 weekly performers win ₦100,000</li>
+                    <li>• More posts = higher ranking = bigger rewards!</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
 
             {/* Active Campaigns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {campaigns.map(campaign => (
-                <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">{campaign.candidateName}</CardTitle>
-                    <CardDescription>{campaign.partyName} - {campaign.position}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Users className="w-4 h-4 mr-1" />
-                        {campaign.supportersCount} supporters
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-white bebas-font text-center">
+                Choose Your Candidate & Start Earning!
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {campaigns.map(campaign => (
+                  <Card key={campaign.id} className="card-hover bg-white/95 backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <Avatar className="w-12 h-12">
+                          <AvatarFallback className="naija-gradient text-white font-bold">
+                            {campaign.candidateName.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg bebas-font">{campaign.candidateName}</CardTitle>
+                          <Badge variant="outline" className="text-xs">{campaign.partyName}</Badge>
+                        </div>
                       </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => setSelectedCampaign(campaign.id)}
-                      >
-                        Support
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <CardDescription className="roboto-font">{campaign.position}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center text-sm text-gray-600 roboto-font">
+                          <Users className="w-4 h-4 mr-2 text-green-600" />
+                          {campaign.supportersCount} supporters already earning
+                        </div>
+                        <Button 
+                          className="w-full btn-naija bebas-font"
+                          onClick={() => setSelectedCampaign(campaign.id)}
+                        >
+                          Support & Start Earning
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </TabsContent>
 
