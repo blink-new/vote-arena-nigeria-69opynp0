@@ -9,8 +9,9 @@ import { Progress } from './components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
 import { Textarea } from './components/ui/textarea'
-import { Trophy, TrendingUp, Camera, Video, Share2, Heart, Eye, Gift, Coins, Star, Upload, Users, Calendar, Award, DollarSign } from 'lucide-react'
+import { Trophy, TrendingUp, Camera, Video, Share2, Heart, Eye, Gift, Coins, Star, Upload, Users, Calendar, Award, DollarSign, MapPin } from 'lucide-react'
 import CampaignFunding from './components/CampaignFunding'
+import StateRegistration from './components/StateRegistration'
 
 function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -22,47 +23,74 @@ function App() {
   const [selectedCampaign, setSelectedCampaign] = useState<string>('')
   const [postContent, setPostContent] = useState('')
   const [postType, setPostType] = useState<'image' | 'video' | 'text'>('text')
+  const [userRegistration, setUserRegistration] = useState<any>(null)
+  const [showStateRegistration, setShowStateRegistration] = useState(false)
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
       setUser(state.user)
       setLoading(state.isLoading)
+      
+      // Check if user needs to complete state registration
+      if (state.user && !state.isLoading) {
+        const savedRegistration = localStorage.getItem(`registration_${state.user.id}`)
+        if (savedRegistration) {
+          setUserRegistration(JSON.parse(savedRegistration))
+        } else {
+          setShowStateRegistration(true)
+        }
+      }
     })
     return unsubscribe
   }, [])
 
   const loadData = useCallback(async () => {
     try {
-      // For now, we'll use mock data since we need to create database tables first
-      const mockCampaigns = [
-        {
-          id: 'camp_1',
-          candidateName: 'Adebayo Ogundimu',
-          partyName: 'Progressive Alliance Party',
-          position: 'Governor - Lagos State',
-          supportersCount: 1250,
-          isActive: "1",
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'camp_2',
-          candidateName: 'Fatima Abdullahi',
-          partyName: 'People\'s Democratic Movement',
-          position: 'Senator - Kano North',
-          supportersCount: 890,
-          isActive: "1",
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'camp_3',
-          candidateName: 'Chukwuma Okafor',
-          partyName: 'New Nigeria Party',
-          position: 'House of Representatives - Anambra East',
-          supportersCount: 650,
-          isActive: "1",
-          createdAt: new Date().toISOString()
+      // Generate state-specific campaigns based on user registration
+      const getStateCampaigns = () => {
+        if (!userRegistration) return []
+        
+        const stateName = userRegistration.state.name
+        const stateCode = userRegistration.state.code
+        
+        const campaignTemplates = {
+          'LA': [
+            { name: 'Adebayo Ogundimu', party: 'Progressive Alliance Party', position: 'Governor', supporters: 1250 },
+            { name: 'Kemi Adebayo', party: 'People\'s Democratic Movement', position: 'Senator - Lagos Central', supporters: 890 },
+            { name: 'Tunde Bakare', party: 'New Nigeria Party', position: 'House of Reps - Surulere', supporters: 650 }
+          ],
+          'KN': [
+            { name: 'Fatima Abdullahi', party: 'All Progressives Congress', position: 'Governor', supporters: 2100 },
+            { name: 'Ibrahim Musa', party: 'People\'s Democratic Party', position: 'Senator - Kano North', supporters: 1450 },
+            { name: 'Aisha Garba', party: 'New Nigeria Party', position: 'House of Reps - Kano Municipal', supporters: 980 }
+          ],
+          'RI': [
+            { name: 'Chioma Okoro', party: 'People\'s Democratic Party', position: 'Governor', supporters: 1800 },
+            { name: 'Emeka Nwosu', party: 'All Progressives Congress', position: 'Senator - Rivers East', supporters: 1200 },
+            { name: 'Grace Amadi', party: 'Labour Party', position: 'House of Reps - Port Harcourt', supporters: 750 }
+          ]
         }
-      ]
+        
+        const defaultCampaigns = [
+          { name: 'Local Candidate A', party: 'Progressive Alliance', position: 'Governor', supporters: 800 },
+          { name: 'Local Candidate B', party: 'Democratic Movement', position: 'Senator', supporters: 600 },
+          { name: 'Local Candidate C', party: 'New Party', position: 'House of Reps', supporters: 400 }
+        ]
+        
+        const templates = campaignTemplates[stateCode as keyof typeof campaignTemplates] || defaultCampaigns
+        
+        return templates.map((template, index) => ({
+          id: `camp_${stateCode}_${index + 1}`,
+          candidateName: template.name,
+          partyName: template.party,
+          position: `${template.position} - ${stateName} State`,
+          supportersCount: template.supporters,
+          isActive: "1",
+          createdAt: new Date().toISOString()
+        }))
+      }
+
+      const mockCampaigns = getStateCampaigns()
 
       setCampaigns(mockCampaigns)
 
@@ -158,13 +186,13 @@ function App() {
     } catch (error) {
       console.error('Error loading data:', error)
     }
-  }, [user?.id, user?.displayName, user?.email])
+  }, [user?.id, user?.displayName, user?.email, userRegistration])
 
   useEffect(() => {
     if (user?.id) {
       loadData()
     }
-  }, [user?.id, loadData])
+  }, [user?.id, loadData, userRegistration])
 
   const createCampaignPost = async () => {
     if (!selectedCampaign || !postContent.trim()) return
@@ -214,6 +242,18 @@ function App() {
       )
     } catch (error) {
       console.error('Error claiming reward:', error)
+    }
+  }
+
+  const handleRegistrationComplete = (registrationData: any) => {
+    // Save registration data to localStorage (in real app, this would go to database)
+    localStorage.setItem(`registration_${user?.id}`, JSON.stringify(registrationData))
+    setUserRegistration(registrationData)
+    setShowStateRegistration(false)
+    
+    // Update user points with welcome bonus
+    if (user) {
+      setUser(prev => prev ? { ...prev, points: (prev.points || 0) + 100 } : null)
     }
   }
 
@@ -280,6 +320,11 @@ function App() {
     )
   }
 
+  // Show state registration if user hasn't completed it
+  if (showStateRegistration) {
+    return <StateRegistration onRegistrationComplete={handleRegistrationComplete} />
+  }
+
   const todayRewards = dailyRewards.filter(r => 
     new Date(r.date).toDateString() === new Date().toDateString()
   )
@@ -300,6 +345,12 @@ function App() {
               <span className="text-sm text-gray-600 roboto-font hidden sm:block">Win Big in Naija's Democracy Game!</span>
             </div>
             <div className="flex items-center space-x-4">
+              {userRegistration && (
+                <Badge variant="outline" className="hidden sm:flex">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {userRegistration.state.name}
+                </Badge>
+              )}
               <Badge className="points-badge">
                 <Coins className="w-4 h-4 mr-1" />
                 {user.points || 0} Points
@@ -315,23 +366,58 @@ function App() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Welcome Section */}
-        <div className="text-center mb-8 arena-glow">
-          <h1 className="text-4xl md:text-6xl font-bold text-white bebas-font mb-4">
+        <div className="text-center mb-8 arena-glow py-16">
+          <h1 className="text-5xl md:text-7xl font-bold text-white bebas-font mb-4">
             Welcome to VoteArena!
           </h1>
-          <h2 className="text-xl md:text-2xl text-yellow-300 roboto-font mb-6">
+          <h2 className="text-2xl md:text-3xl text-yellow-300 roboto-font mb-6">
             Play, Win, and Shape Naija's Future!
           </h2>
           <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 roboto-font">
-            Oga, join the ultimate democracy game in Lagos, Kano, and Rivers! Vote, earn cash, VST tokens, or jobs, and make your voice count.
+            {userRegistration ? (
+              `Welcome to ${userRegistration.state.name} State! Join thousands of voters earning rewards by supporting your local candidates. Your voice matters!`
+            ) : (
+              'Oga, join the ultimate democracy game in Lagos, Kano, and Rivers! Vote for candidates, earn cash, VST tokens, or jobs, and make your voice count. Beta launches Q3 2025!'
+            )}
           </p>
-          <div className="text-center">
-            <span className="text-yellow-300 font-bold bebas-font text-lg">Vote. Earn. Win.</span>
+          
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <div className="text-2xl font-bold text-yellow-300 bebas-font">₦20,000</div>
+              <div className="text-sm text-white/80">Daily Rewards</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <div className="text-2xl font-bold text-yellow-300 bebas-font">₦100,000</div>
+              <div className="text-sm text-white/80">Weekly Jackpot</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <div className="text-2xl font-bold text-yellow-300 bebas-font">₦500,000</div>
+              <div className="text-sm text-white/80">Scholarships</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+              <div className="text-2xl font-bold text-yellow-300 bebas-font">#{userRank || 'Join'}</div>
+              <div className="text-sm text-white/80">Your Rank</div>
+            </div>
+          </div>
+          
+          <div className="text-center space-y-4">
+            <p className="text-yellow-300 font-bold bebas-font text-xl italic">Vote. Earn. Win.</p>
+            <p className="text-white/70 text-sm roboto-font">
+              Join thousands of Nigerians already earning rewards for political engagement
+            </p>
           </div>
         </div>
 
-        {/* Rewards Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Win Big in the Reward Arena */}
+        <div className="text-center mb-8">
+          <h2 className="text-4xl font-bold text-white bebas-font mb-4">Win Big in the Reward Arena</h2>
+          <p className="text-lg text-white/80 roboto-font max-w-2xl mx-auto">
+            Oga, no be small thing! Share campaign posts, climb the leaderboard, and win amazing prizes that will change your life!
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="reward-card text-white bg-gradient-to-r from-green-500 to-green-600 card-hover">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center bebas-font">
@@ -341,7 +427,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₦80,000</div>
-              <p className="text-green-100 text-sm">Share posts on X to win 50kg rice</p>
+              <p className="text-green-100 text-sm">Share candidate posts on X to win a 50kg bag of rice. No hunger for your hustle!</p>
             </CardContent>
           </Card>
 
@@ -354,7 +440,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₦500,000</div>
-              <p className="text-yellow-100 text-sm">Top voters win school fees</p>
+              <p className="text-yellow-100 text-sm">Top voters in Lagos, Kano, and Rivers win scholarships for school fees. Education na power!</p>
             </CardContent>
           </Card>
 
@@ -362,12 +448,12 @@ function App() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center bebas-font">
                 <DollarSign className="w-5 h-5 mr-2" />
-                Monthly Salary
+                Win Monthly Salary
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₦100,000</div>
-              <p className="text-blue-100 text-sm">Monthly salary for a year</p>
+              <p className="text-blue-100 text-sm">Climb the leaderboard to win a monthly salary for a year. Your vote pays your bills!</p>
             </CardContent>
           </Card>
 
@@ -375,23 +461,24 @@ function App() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center bebas-font">
                 <TrendingUp className="w-5 h-5 mr-2" />
-                Your Rank
+                Win Empowerment & Employment
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">#{userRank || 'Unranked'}</div>
-              <p className="text-purple-100 text-sm">This week's position</p>
+              <div className="text-2xl font-bold">₦200,000</div>
+              <p className="text-purple-100 text-sm">Engage with Honourables to win training programs or jobs to boost your career!</p>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="campaign" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="campaign">Campaign</TabsTrigger>
             <TabsTrigger value="funding">Funding</TabsTrigger>
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
             <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
             <TabsTrigger value="posts">My Posts</TabsTrigger>
+            <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
 
           {/* Campaign Tab */}
@@ -517,8 +604,20 @@ function App() {
             {/* Active Campaigns */}
             <div className="space-y-4">
               <h3 className="text-2xl font-bold text-white bebas-font text-center">
-                Choose Your Candidate & Start Earning!
+                {userRegistration ? (
+                  `${userRegistration.state.name} State Candidates - Choose & Start Earning!`
+                ) : (
+                  'Choose Your Candidate & Start Earning!'
+                )}
               </h3>
+              {userRegistration && (
+                <div className="text-center mb-6">
+                  <Badge className="bg-green-600 text-white px-4 py-2 text-sm">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Registered in {userRegistration.state.name} State • {userRegistration.state.voters} voters
+                  </Badge>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {campaigns.map(campaign => (
                   <Card key={campaign.id} className="card-hover bg-white/95 backdrop-blur-sm">
@@ -723,6 +822,133 @@ function App() {
                       No posts yet. Start spreading campaigns to earn rewards!
                     </p>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* About Tab */}
+          <TabsContent value="about" className="space-y-6">
+            {/* About VoteArena */}
+            <Card className="bg-white/95 backdrop-blur-sm">
+              <CardHeader className="text-center">
+                <CardTitle className="text-3xl bebas-font naija-text-gradient">
+                  About VoteArena
+                </CardTitle>
+                <CardDescription className="text-lg roboto-font">
+                  Nigeria's First Gamified Political Engagement Platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-lg text-gray-700 text-center max-w-3xl mx-auto roboto-font">
+                  VoteArena is Nigeria's first gamified platform for political engagement, rewarding 87M voters with VST tokens, cash, scholarships, and jobs. From Lagos to Kano to Rivers, we make democracy fun and impactful. Join us!
+                </p>
+                
+                {/* Key Features */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-green-50 p-6 rounded-lg">
+                    <h4 className="text-xl font-bold text-green-700 mb-3 bebas-font">For Voters</h4>
+                    <ul className="space-y-2 text-gray-700 roboto-font">
+                      <li>• Earn cash rewards for political engagement</li>
+                      <li>• Win scholarships worth ₦500,000</li>
+                      <li>• Get monthly salaries for top performers</li>
+                      <li>• Access job opportunities from politicians</li>
+                      <li>• Participate in Q&A gaming experiences</li>
+                    </ul>
+                  </div>
+                  <div className="bg-yellow-50 p-6 rounded-lg">
+                    <h4 className="text-xl font-bold text-yellow-700 mb-3 bebas-font">For Politicians</h4>
+                    <ul className="space-y-2 text-gray-700 roboto-font">
+                      <li>• Reach millions of Nigerian voters</li>
+                      <li>• Run targeted campaign content</li>
+                      <li>• Engage supporters through rewards</li>
+                      <li>• Host live podcast sessions</li>
+                      <li>• Raise campaign funds securely</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Coverage Areas */}
+                <div className="bg-blue-50 p-6 rounded-lg text-center">
+                  <h4 className="text-xl font-bold text-blue-700 mb-3 bebas-font">Coverage Areas</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg">
+                      <h5 className="font-bold text-blue-600 bebas-font">Lagos State</h5>
+                      <p className="text-sm text-gray-600">Economic hub with millions of voters</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg">
+                      <h5 className="font-bold text-blue-600 bebas-font">Kano State</h5>
+                      <p className="text-sm text-gray-600">Northern Nigeria's political center</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg">
+                      <h5 className="font-bold text-blue-600 bebas-font">Rivers State</h5>
+                      <p className="text-sm text-gray-600">Oil-rich region with active politics</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Meet the Founder */}
+            <Card className="bg-white/95 backdrop-blur-sm">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl bebas-font naija-text-gradient">
+                  Meet the Founder
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-md mx-auto text-center">
+                  <Avatar className="w-24 h-24 mx-auto mb-4">
+                    <AvatarImage src="/images/larry-headshot.png" alt="Founder" />
+                    <AvatarFallback className="naija-gradient text-white text-2xl font-bold">
+                      RB
+                    </AvatarFallback>
+                  </Avatar>
+                  <h3 className="text-xl font-bold text-gray-800 bebas-font">
+                    Raheem Larry Babatunde
+                  </h3>
+                  <p className="text-gray-600 mb-3 roboto-font">Founder & CEO</p>
+                  <p className="text-gray-700 roboto-font">
+                    Lagos-based visionary with 5+ years in fintech and community startups, driving VoteArena to empower Nigeria's 87M voters through gamified political engagement.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact & Social */}
+            <Card className="bg-white/95 backdrop-blur-sm">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl bebas-font naija-text-gradient">
+                  Connect With Us
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <h4 className="font-bold text-gray-800 mb-3 bebas-font">Contact Information</h4>
+                    <div className="space-y-2 text-gray-600 roboto-font">
+                      <p>📍 10 Adeola Odeku, Victoria Island, Lagos</p>
+                      <p>📧 info@votearena.ng</p>
+                      <p>📞 +234-123-456-789</p>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="font-bold text-gray-800 mb-3 bebas-font">Follow Us</h4>
+                    <div className="space-y-2 text-gray-600 roboto-font">
+                      <p>🐦 @VoteArenaNG on Twitter</p>
+                      <p>📸 @votearenang on Instagram</p>
+                      <p>💬 WhatsApp Support Available</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center mt-6 pt-6 border-t">
+                  <p className="text-sm text-gray-600 roboto-font">
+                    © 2025 VoteArena Nigeria Ltd. All rights reserved.
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2 roboto-font">
+                    Beta launching Q3 2025 • Making democracy fun and rewarding for all Nigerians
+                  </p>
                 </div>
               </CardContent>
             </Card>
