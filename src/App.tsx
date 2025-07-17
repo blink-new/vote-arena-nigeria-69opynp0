@@ -9,7 +9,7 @@ import { Progress } from './components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar'
 import { Input } from './components/ui/input'
 import { Textarea } from './components/ui/textarea'
-import { Trophy, TrendingUp, Camera, Video, Share2, Heart, Eye, Gift, Coins, Star, Upload, Users, Calendar, Award, DollarSign, MapPin } from 'lucide-react'
+import { Trophy, TrendingUp, Camera, Video, Share2, Heart, Eye, Gift, Coins, Star, Upload, Users, Calendar, Award, DollarSign, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
 import CampaignFunding from './components/CampaignFunding'
 import StateRegistration from './components/StateRegistration'
 
@@ -320,10 +320,7 @@ function App() {
     )
   }
 
-  // Show state registration if user hasn't completed it
-  if (showStateRegistration) {
-    return <StateRegistration onRegistrationComplete={handleRegistrationComplete} />
-  }
+  // Don't show full-page state registration anymore - it will be a dropdown section
 
   const todayRewards = dailyRewards.filter(r => 
     new Date(r.date).toDateString() === new Date().toDateString()
@@ -365,6 +362,67 @@ function App() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* State Registration Dropdown */}
+        {showStateRegistration && (
+          <div className="mb-8">
+            <Card className="bg-yellow-50 border-yellow-200 border-2">
+              <CardHeader 
+                className="cursor-pointer hover:bg-yellow-100 transition-colors"
+                onClick={() => setShowStateRegistration(false)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 naija-gradient rounded-full flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl bebas-font text-yellow-800">
+                        Complete Your State Registration
+                      </CardTitle>
+                      <CardDescription className="text-yellow-700 roboto-font">
+                        Register with your state to unlock local campaigns and rewards
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <ChevronUp className="w-5 h-5 text-yellow-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <StateRegistration onRegistrationComplete={handleRegistrationComplete} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* State Registration Trigger (when collapsed) */}
+        {!showStateRegistration && !userRegistration && (
+          <div className="mb-8">
+            <Card 
+              className="bg-yellow-50 border-yellow-200 border-2 cursor-pointer hover:bg-yellow-100 transition-colors"
+              onClick={() => setShowStateRegistration(true)}
+            >
+              <CardHeader className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 naija-gradient rounded-full flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg bebas-font text-yellow-800">
+                        🎯 Complete State Registration to Unlock Full Features
+                      </CardTitle>
+                      <CardDescription className="text-yellow-700 roboto-font">
+                        Click to register and access local campaigns, higher rewards, and state-specific opportunities
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <ChevronDown className="w-5 h-5 text-yellow-600" />
+                </div>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
+
         {/* Hero Welcome Section */}
         <div className="text-center mb-8 arena-glow py-16">
           <h1 className="text-5xl md:text-7xl font-bold text-white bebas-font mb-4">
